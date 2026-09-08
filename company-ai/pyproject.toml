@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "company-ai"
+version = "0.1.0"
+description = "Hierarchical multi-agent AI system with Gradio UI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "google-genai>=1.37.0",
+  "gradio>=5.5.0",
+  "groq>=0.13.0",
+  "httpx>=0.27.0",
+  "python-dotenv>=1.0.1",
+]
+
+[tool.setuptools.packages.find]
+include = ["company_ai*"]

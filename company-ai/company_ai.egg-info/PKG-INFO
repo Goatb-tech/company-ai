@@ -1,0 +1,85 @@
+Metadata-Version: 2.4
+Name: company-ai
+Version: 0.1.0
+Summary: Hierarchical multi-agent AI system with Gradio UI
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: google-genai>=1.37.0
+Requires-Dist: gradio>=5.5.0
+Requires-Dist: groq>=0.13.0
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: python-dotenv>=1.0.1
+
+# Company AI
+
+Hierarchical multi-agent AI system in Python with a Gradio UI. A CEO agent can create employee agents, delegate work, inspect budget, and remove workers after tasks finish.
+
+## Features
+
+- CEO and employee hierarchy with autonomous delegation loops
+- Cloud and local model support: Groq, Gemini, and Ollama
+- Budget tracking with separate cloud spend and local call counts
+- Basic activity console for team operations
+- Extensible tool registry for future agent tools
+
+## Providers
+
+- `groq` uses the `groq` Python SDK and `GROQ_API_KEY`
+- `gemini` uses the `google-genai` SDK and `GEMINI_API_KEY` or `GOOGLE_API_KEY`
+- `ollama` uses `OLLAMA_BASE_URL` and the local `/api/chat` endpoint
+
+The app does not hardcode model pricing. You set input and output cost per 1M tokens in the UI for the CEO and default worker model. This makes cost tracking explicit and lets you match current vendor pricing without code changes.
+
+## Setup
+
+1. Create a virtual environment.
+2. Install dependencies.
+3. Configure environment variables.
+4. Launch the app.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+cp .env.example .env
+python app.py
+```
+
+If you want to use Ollama locally, make sure the server is running and a model is available, for example `ollama run llama3.2`.
+
+## Usage
+
+1. Choose the CEO provider and model.
+2. Choose the default worker provider and model.
+3. Set your total budget and per-model token pricing.
+4. Chat with the CEO in the main console.
+5. Watch the team panel, activity feed, and budget panel update as work is delegated.
+
+## Custom Tools
+
+Edit `company_ai/tools/custom.py` to register additional tools. The runtime automatically loads them at startup.
+
+Example:
+
+```python
+def register_custom_tools(registry: ToolRegistry) -> None:
+    @registry.register(
+        name="my_tool",
+        description="Describe what the tool does.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "text": {"type": "string"}
+            },
+            "required": ["text"],
+        },
+    )
+    def my_tool(context: ToolContext, arguments: dict) -> dict:
+        return {"echo": arguments["text"]}
+```
+
+## Notes
+
+- Cloud calls are blocked once the remaining cloud budget reaches zero or below.
+- Local Ollama calls continue to work even when the cloud budget is exhausted.
+- Existing employees keep their own model configuration after creation; changing the default worker settings only affects newly created employees.
